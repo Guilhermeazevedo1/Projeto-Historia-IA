@@ -1,0 +1,51 @@
+@keyframes drift {
+  from {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2%, 1%, 0) scale(1.05);
+  }
+}
+
+@keyframes pulseLine {
+  0%,
+  100% {
+    opacity: 0.35;
+    stroke-dashoffset: 40;
+  }
+  50% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes tokenFlow {
+  from {
+    transform: translateX(-12px);
+    opacity: 0.35;
+  }
+  to {
+    transform: translateX(12px);
+    opacity: 1;
+  }
+}
+
+@keyframes frost {
+  from {
+    filter: saturate(0.9) blur(0);
+  }
+  to {
+    filter: saturate(0.2) blur(1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
