@@ -59,15 +59,15 @@ export const chapters: Chapter[] = [
     shortLabel: "Como aprender?",
     title: "O neurônio artificial",
     question: "Como ensinar uma máquina?",
-    summary: "Entradas, pesos e limiares transformam sinais em uma decisão simples.",
+    summary: "Características simples podem ser combinadas para produzir uma decisão binária: gato ou cachorro.",
     beats: [
-      "Uma máquina pode combinar sinais e produzir uma saída.",
-      "Os pesos dizem quais sinais importam mais.",
-      "Aprender, nessa visão inicial, significa ajustar números até que a resposta fique melhor."
+      "Primeiro observamos características do animal.",
+      "Depois revelamos que cada característica possui uma importância diferente.",
+      "Aprender, nessa visão inicial, significa ajustar esses números até que a resposta fique melhor."
     ],
     speakerNotes: [
-      "Comece pela manipulação dos controles antes de revelar a fórmula.",
-      "Mostre que a saída muda quando o peso muda, mesmo com a mesma entrada."
+      "Comece manipulando apenas as características, sem mostrar pesos nem fórmula.",
+      "Revele os pesos depois que a plateia já entendeu a intuição visual."
     ],
     transitionQuestion: "Mas quem ajusta esses números?",
     visualTone: "machine"
@@ -96,18 +96,19 @@ export const chapters: Chapter[] = [
     act: "journey",
     shortLabel: "Linha falha",
     title: "O problema",
-    question: "Nem tudo pode ser separado por uma linha.",
-    summary: "A promessa encontra um limite simples e teimoso: há padrões que uma única fronteira linear não consegue separar.",
+    question: "Mas será que uma linha resolve qualquer padrão?",
+    summary: "",
     beats: [
-      "A demonstração deixa de parecer obediente.",
-      "A linha se move, mas o erro não desaparece.",
-      "A pergunta muda: se uma camada não basta, por que não conectar várias?"
+      "A linha se move.",
+      "O erro muda de lugar.",
+      "Mas nunca desaparece.",
+      "Nem todo problema é linearmente separável."
     ],
     speakerNotes: [
-      "Use XOR como frustração visual antes da explicação formal.",
-      "Não apresente como fim da IA; apresente como uma limitação que cria a próxima necessidade."
+      "Deixe a plateia tentar antes de nomear o padrão.",
+      "Não apresente a solução ainda; a seção deve terminar em quebra de expectativa."
     ],
-    transitionQuestion: "Se conectarmos vários neurônios, quem ajusta todos esses pesos?",
+    transitionQuestion: "E esse não era o único problema.",
     visualTone: "machine"
   },
   {
@@ -116,15 +117,15 @@ export const chapters: Chapter[] = [
     shortLabel: "Inverno",
     title: "O inverno da IA",
     question: "O que acontece quando a promessa corre mais rápido que a tecnologia?",
-    summary: "Expectativas crescem, financiamento recua e a tela desacelera.",
+    summary: "A expectativa cresceu mais rápido que os resultados.",
     beats: [
-      "Máquinas inteligentes em poucos anos.",
-      "A linguagem será resolvida em breve.",
-      "O inverno da IA foi também um choque entre ambição pública e capacidade real."
+      "PROMESSAS ↑",
+      "RESULTADOS aquém do esperado",
+      "FINANCIAMENTO ↓"
     ],
     speakerNotes: [
-      "As frases são expectativas sintetizadas, não citações literais.",
-      "Destaque que o inverno não apaga as ideias; ele diminui o ritmo."
+      "Mostre como um conjunto de expectativas não correspondidas reduziu o entusiasmo.",
+      "Não atribua o inverno a uma única limitação técnica."
     ],
     transitionQuestion: "O que precisaria mudar para essas ideias voltarem a funcionar?",
     visualTone: "winter"
@@ -135,17 +136,13 @@ export const chapters: Chapter[] = [
     shortLabel: "Descongelar",
     title: "Descongelar",
     question: "O que precisou mudar?",
-    summary: "Dados, computação, arquiteturas e métodos se acumulam até reacender redes neurais.",
-    beats: [
-      "Nada volta por um único motivo.",
-      "Múltiplas camadas, backpropagation, dados e GPUs criam uma evolução acumulativa.",
-      "A temperatura visual sobe aos poucos."
-    ],
+    summary: "Não foi uma única descoberta. Várias peças amadureceram juntas.",
+    beats: [],
     speakerNotes: [
       "Evite sugerir que todos os avanços aconteceram de uma vez.",
       "Use esta seção como ponte emocional e técnica."
     ],
-    transitionQuestion: "Antes de corrigir uma rede, como medimos o quão errada ela está?",
+    transitionQuestion: "Antes de descobrir como corrigir a rede, precisamos responder uma pergunta: quanto ela errou?",
     visualTone: "thaw"
   },
   {
@@ -154,12 +151,8 @@ export const chapters: Chapter[] = [
     shortLabel: "Medir erro",
     title: "Medir o erro",
     question: "Como medir o quão errado estamos?",
-    summary: "Antes de corrigir uma rede, precisamos transformar 'está errado' em uma quantidade manipulável.",
-    beats: [
-      "Resposta correta: 1.",
-      "A rede respondeu: 0.2.",
-      "Uma função de perda vira a régua que mede a distância entre tentativa e alvo."
-    ],
+    summary: "Não basta saber que erramos. Precisamos medir quanto erramos.",
+    beats: [],
     speakerNotes: [
       "Introduza erro antes de backpropagation.",
       "Evite aprofundar em história de mínimos quadrados sem revisão específica."
@@ -170,59 +163,48 @@ export const chapters: Chapter[] = [
   {
     id: "backprop",
     act: "journey",
-    shortLabel: "Erro",
-    title: "Erro e back-propagation",
+    shortLabel: "Backpropagation",
+    title: "Back\npropagation",
     question: "Como uma rede aprende com seus erros?",
-    summary: "A previsão avança; o erro retorna distribuindo responsabilidade pelas conexões.",
-    beats: [
-      "Entrada vira previsão.",
-      "Previsão encontra resposta correta e produz erro.",
-      "O erro volta pela rede para ajustar pesos."
-    ],
+    summary: "A rede respondeu. Sabemos quanto ela errou. Agora precisamos descobrir por quê.",
+    beats: [],
     speakerNotes: [
-      "Explique regra da cadeia como responsabilidade distribuída.",
-      "A simulação é numérica e didática, não uma rede real completa."
+      "Explique que backpropagation calcula gradientes, sem dizer que ele atualiza os pesos sozinho.",
+      "Use a regra da cadeia como dependências encadeadas, não como uma aula de cálculo."
     ],
-    transitionQuestion: "Mas como sabemos em qual direção alterar cada peso?",
+    transitionQuestion: "Como usamos essa informação para diminuir a perda?",
     visualTone: "flow"
   },
   {
     id: "gradient",
     act: "journey",
     shortLabel: "Direção",
-    title: "Gradient descent",
-    question: "Como reduzir o erro?",
+    title: "Gradient\ndescent",
+    question: "Sabemos a direção. Quanto devemos andar?",
     summary: "Aprender é procurar uma configuração de pesos que produza menos perda.",
-    beats: [
-      "Uma taxa pequena aprende devagar.",
-      "Uma taxa adequada chega ao vale com eficiência.",
-      "Uma taxa grande demais oscila e pode divergir."
-    ],
+    beats: [],
     speakerNotes: [
       "Use a paisagem como intuição, não como aula formal de cálculo.",
       "Compare perda decrescente e oscilante."
     ],
     transitionQuestion:
-      "Redes conseguiam aprender padrões. Mas como representar algo tão ambíguo quanto a linguagem?",
+      "Agora as redes podiam ajustar milhares — e depois milhões — de parâmetros. Mas havia outro problema: como transformar palavras em algo que uma rede pudesse processar?",
     visualTone: "flow"
   },
   {
     id: "deep-learning",
     act: "journey",
-    shortLabel: "Escala",
-    title: "Deep Learning",
-    question: "O que acontece quando empilhamos muitas camadas?",
-    summary: "A rede deixa de ser uma única decisão e passa a construir representações em níveis sucessivos.",
-    beats: [
-      "Um neurônio vira uma camada.",
-      "Camadas viram profundidade.",
-      "Padrões simples podem sustentar representações cada vez mais abstratas."
-    ],
+    shortLabel: "Profundidade",
+    title: "Deep\nLearning",
+    question: "Como uma rede constrói representações cada vez mais complexas?",
+    summary: "Uma camada transforma a informação e entrega uma nova representação para a próxima.",
+    beats: [],
     speakerNotes: [
-      "Use a escala como ponte: agora máquinas reconhecem padrões complexos.",
-      "Não apresente pixels, bordas e objetos como regra absoluta; trate como intuição."
+      "Trate bordas, formas e partes como exemplo conceitual, não como regra universal.",
+      "Reforce que deep learning usa os mesmos mecanismos de treino em redes mais profundas."
     ],
-    transitionQuestion: "Mas como fazer tudo isso com linguagem?",
+    transitionQuestion:
+      "Agora essas redes podiam construir representações cada vez mais complexas. Mas o próximo salto exigiria muito mais: dados, computação e novas arquiteturas.",
     visualTone: "space"
   },
   {
@@ -231,37 +213,29 @@ export const chapters: Chapter[] = [
     shortLabel: "Linguagem",
     title: "Linguagem",
     question: "Como representar linguagem?",
-    summary: "Regras, contagens, n-gramas e tokens mostram que texto também vira estrutura.",
-    beats: [
-      "A história da linguagem computacional não começa com Transformers.",
-      "Contextos maiores capturam mais informação, mas escalam pior.",
-      "Tokenizar é transformar texto em unidades manipuláveis."
-    ],
+    summary: "Aumentar o contexto considerado pode alterar a previsão da próxima palavra.",
+    beats: [],
     speakerNotes: [
-      "Reforce que o tokenizer é local e simplificado.",
-      "Mostre unigram, bigram e trigram antes de avançar."
+      "Mostre unigram, bigram e trigram antes de avançar.",
+      "Reforce que os valores são didáticos e servem apenas para visualizar a mudança de contexto."
     ],
     transitionQuestion:
-      "Ter representações das palavras é suficiente para compreender como elas se relacionam dentro de uma frase?",
+      "Mas existe um problema mais básico: como uma máquina opera sobre palavras?",
     visualTone: "flow"
   },
   {
     id: "ngrams",
     act: "journey",
-    shortLabel: "N-gramas",
-    title: "N-gramas",
-    question: "Podemos prever linguagem olhando para o passado?",
-    summary: "Antes dos LLMs, uma intuição já aparecia: talvez a próxima palavra dependa das anteriores.",
-    beats: [
-      "Contextos pequenos capturam pouco.",
-      "Contextos maiores ajudam, mas aumentam combinações.",
-      "Palavras semelhantes ainda parecem objetos separados demais."
-    ],
+    shortLabel: "Tokens",
+    title: "Tokens",
+    question: "Como uma máquina opera sobre palavras?",
+    summary: "Texto precisa virar unidades manipuláveis antes de ser processado.",
+    beats: [],
     speakerNotes: [
-      "Use o seletor unigram, bigram e trigram.",
-      "Prepare a pergunta que leva a embeddings: e se significado pudesse virar posição?"
+      "Avance passo a passo: frase, unidades, divisão didática e IDs.",
+      "Reforce que IDs são identificadores, não significado."
     ],
-    transitionQuestion: "E se pudéssemos representar significado como posição?",
+    transitionQuestion: "Se IDs não carregam significado, como representamos relações entre tokens?",
     visualTone: "flow"
   },
   {
@@ -270,18 +244,14 @@ export const chapters: Chapter[] = [
     shortLabel: "Espaço",
     title: "Embeddings",
     question: "Como palavras viram posições?",
-    summary: "Palavras usadas em contextos semelhantes passam a ocupar regiões próximas.",
-    beats: [
-      "A linguagem deixa de ser uma linha e passa a ocupar um espaço.",
-      "Proximidade sugere relação semântica, mas não é garantia perfeita.",
-      "Analogias vetoriais são intuições úteis, não leis universais."
-    ],
+    summary: "Um embedding transforma cada token em um vetor com muitas dimensões.",
+    beats: [],
     speakerNotes: [
-      "Selecione uma palavra e destaque vizinhas.",
-      "Apresente rei - homem + mulher como aproximação cautelosa."
+      "Comece no mapa 2D e entre no espaço somente depois da ideia de proximidade.",
+      "Selecione gato para mostrar vizinhança e rei para revelar a analogia ilustrativa.",
+      "Volte à frase para preparar a pergunta sobre atenção."
     ],
-    transitionQuestion:
-      "Ter palavras em espaço vetorial basta para saber para onde olhar dentro de uma frase?",
+    transitionQuestion: "Para onde devemos olhar?",
     visualTone: "space"
   },
   {
@@ -290,15 +260,12 @@ export const chapters: Chapter[] = [
     shortLabel: "Para onde olhar?",
     title: "Attention",
     question: "Como decidir no que prestar atenção?",
-    summary: "Atenção ilumina relações entre palavras que antes estavam invisíveis.",
-    beats: [
-      "Para interpretar uma palavra, o modelo precisa olhar para outras.",
-      "Query é o que uma palavra procura.",
-      "Key é o que cada palavra oferece; Value é a informação transportada."
-    ],
+    summary: "Atenção permite que cada palavra reúna informações relevantes de outras posições.",
+    beats: [],
     speakerNotes: [
-      "Clique em 'ele' e pergunte para onde a frase aponta.",
-      "Só depois revele Q, K e V."
+      "Avance por Query, Key, pesos e Value antes de liberar a exploração.",
+      "Reforce que os pesos são ilustrativos e que a frase permanece ambígua.",
+      "No modo livre, compare como cada palavra procura relações diferentes."
     ],
     transitionQuestion:
       "O que acontece quando repetimos esse mecanismo muitas vezes, em várias camadas?",
@@ -310,15 +277,16 @@ export const chapters: Chapter[] = [
     shortLabel: "Transformer",
     title: "Transformer",
     question: "Como organizar atenção em escala?",
-    summary: "Tokens viram vetores, atravessam camadas e produzem probabilidades para o próximo token.",
+    summary: "Um Transformer organiza atenção, preserva informação e repete o mesmo bloco em muitas camadas.",
     beats: [
-      "A arquitetura não aparece inteira de uma vez.",
-      "Acompanhe um token atravessando posição, atenção e camadas.",
-      "Modelos autoregressivos repetem o ciclo para gerar texto."
+      "A atenção é apenas uma parte do bloco.",
+      "Todas as posições são atualizadas em paralelo.",
+      "Na geração, o ciclo escolhe um token por vez."
     ],
     speakerNotes: [
-      "Use o modo passo a passo.",
-      "Mencione encoder, decoder e encoder-decoder sem perder o foco na geração."
+      "Construa o bloco passo a passo antes de mostrar sua repetição em profundidade.",
+      "Os papéis das cabeças são exemplos didáticos, não funções fixas aprendidas por toda cabeça.",
+      "Mantenha o foco no decoder e compare as três famílias somente no último passo."
     ],
     transitionQuestion: "Como surgem respostas longas a partir de escolhas de próximo token?",
     visualTone: "system"
@@ -328,14 +296,16 @@ export const chapters: Chapter[] = [
     act: "journey",
     shortLabel: "Como gerar?",
     title: "LLMs e geração",
-    question: "Como surgem os LLMs?",
+    question: "Como um LLM gera texto?",
     summary: "Um LLM gera texto escolhendo possibilidades para o próximo token, repetidamente.",
     beats: [
+      "O contexto produz uma distribuição de próximos tokens.",
       "Temperatura baixa favorece escolhas previsíveis.",
       "Temperatura alta amplia variação e risco de incoerência.",
-      "A geração pode soar fluente sem encerrar a questão da compreensão."
+      "A resposta cresce quando esse ciclo se repete."
     ],
     speakerNotes: [
+      "Mostre que a frase não aparece inteira de uma vez: ela cresce token por token.",
       "Gere algumas continuações com temperaturas diferentes.",
       "Evite antropomorfizar o sistema durante a demonstração."
     ],
@@ -348,11 +318,11 @@ export const chapters: Chapter[] = [
     shortLabel: "Sistemas",
     title: "IA generativa",
     question: "O que acontece quando o modelo vira parte de um sistema maior?",
-    summary: "Texto, imagem, áudio, código, ferramentas e contexto ampliam a sensação de capacidade.",
+    summary: "A capacidade aparente cresce quando o LLM passa a operar com contexto, busca, ferramentas e outras modalidades.",
     beats: [
       "O LLM deixa de aparecer isolado.",
-      "Contexto, RAG, ferramentas e memória criam sistemas mais úteis.",
-      "No ápice da complexidade, a pergunta filosófica fica mais urgente."
+      "Cada camada muda o que chega ao modelo ou o que ele pode fazer.",
+      "Responder melhor ainda não encerra a pergunta sobre compreensão."
     ],
     speakerNotes: [
       "Mostre como a capacidade aparente cresce quando modelos são combinados a ferramentas.",

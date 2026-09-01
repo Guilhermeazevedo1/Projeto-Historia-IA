@@ -6,7 +6,7 @@ Mostra duas entidades textuais com respostas predefinidas. Objetivo: discutir co
 
 ## Neuronio artificial
 
-Controles de entradas e vies permitem observar a soma ponderada e a decisao.
+Classificacao binaria "gato ou cachorro". Primeiro aparecem apenas caracteristicas do animal e a decisao; depois o apresentador revela os pesos para mostrar que cada entrada possui importancia diferente. A espessura das conexoes representa visualmente esses pesos, e a formula aparece apenas depois da intuicao visual.
 
 ## Perceptron e XOR
 

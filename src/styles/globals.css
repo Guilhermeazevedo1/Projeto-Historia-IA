@@ -208,6 +208,18 @@ a {
   font-size: clamp(2rem, 3.55vw, 4.15rem);
 }
 
+#gradient h2 {
+  max-width: 100%;
+  white-space: pre;
+  font-size: clamp(2rem, 3.55vw, 4.15rem);
+}
+
+#deep-learning h2 {
+  max-width: 100%;
+  white-space: pre;
+  font-size: clamp(2rem, 3.55vw, 4.15rem);
+}
+
 .chapter__question {
   margin: 0;
   color: var(--color-text-secondary);

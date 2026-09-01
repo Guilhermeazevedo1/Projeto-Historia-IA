@@ -29,8 +29,10 @@ import {
   PerceptronPlayground,
   TemperatureSampler,
   ThawDemo,
+  TokensLab,
   TransformerFlow,
-  WinterExpectations
+  WinterExpectations,
+  XorLimitationPlayground
 } from "../visualizations/Visualizations";
 
 import "../styles/globals.css";
@@ -124,7 +126,7 @@ export const App = () => {
       case "perceptron":
         return <PerceptronPlayground showModeToggle={false} />;
       case "xor-problem":
-        return <PerceptronPlayground initialMode="xor" showModeToggle={false} />;
+        return <XorLimitationPlayground />;
       case "winter":
         return <WinterExpectations />;
       case "thaw":
@@ -140,13 +142,13 @@ export const App = () => {
       case "language":
         return <LanguageLab />;
       case "ngrams":
-        return <LanguageLab />;
+        return <TokensLab />;
       case "embeddings":
-        return <EmbeddingSpace />;
+        return <EmbeddingSpace reducedMotion={reducedMotion} />;
       case "attention":
-        return <AttentionVisualizer />;
+        return <AttentionVisualizer reducedMotion={reducedMotion} />;
       case "transformer":
-        return <TransformerFlow />;
+        return <TransformerFlow reducedMotion={reducedMotion} />;
       case "llm":
         return <TemperatureSampler />;
       case "generative-ai":
