@@ -3061,6 +3061,24 @@
   flex: 0 0 auto;
 }
 
+#gradient .landscape__controls .primary-button,
+#gradient .landscape__controls .ghost-button {
+  width: auto;
+  min-width: 0;
+  min-height: 2.45rem;
+  padding: 0.62rem 0.88rem;
+}
+
+#gradient .landscape__controls .primary-button svg,
+#gradient .landscape__controls .ghost-button svg {
+  width: 1rem !important;
+  min-width: 1rem;
+  max-width: 1rem;
+  height: 1rem !important;
+  min-height: 1rem !important;
+  max-height: 1rem;
+}
+
 .landscape-rate-controls {
   display: flex;
   flex-wrap: wrap;
