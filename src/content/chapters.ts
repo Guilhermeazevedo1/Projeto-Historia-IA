@@ -151,11 +151,12 @@ export const chapters: Chapter[] = [
     shortLabel: "Medir erro",
     title: "Medir o erro",
     question: "Como medir o quão errado estamos?",
-    summary: "Não basta saber que erramos. Precisamos medir quanto erramos.",
+    summary: "De Ceres às redes neurais, prever exige comparar o que o modelo espera com aquilo que observamos.",
     beats: [],
     speakerNotes: [
-      "Introduza erro antes de backpropagation.",
-      "Evite aprofundar em história de mínimos quadrados sem revisão específica."
+      "Apresente Ceres como o problema que cria a necessidade de comparar órbitas possíveis.",
+      "Diferencie o cálculo orbital de Gauss da história mais ampla dos mínimos quadrados, associada também a Legendre.",
+      "No último passo, mostre que a IA reutiliza a estrutura previsão, comparação, perda e ajuste."
     ],
     transitionQuestion: "Sabemos o tamanho do erro. Mas qual peso deve mudar?",
     visualTone: "flow"
@@ -345,7 +346,7 @@ export const chapters: Chapter[] = [
     ],
     speakerNotes: [
       "Faça uma pausa real antes de avançar.",
-      "Este contraste prepara a Sala Chinesa."
+      "Este contraste prepara o Quarto Chinês."
     ],
     transitionQuestion: "Responder é compreender?",
     visualTone: "quiet"
@@ -354,38 +355,21 @@ export const chapters: Chapter[] = [
     id: "chinese-room",
     act: "reflection",
     shortLabel: "Compreender?",
-    title: "A Sala Chinesa",
+    title: "O Quarto Chinês",
     question: "Produzir respostas é o mesmo que compreender?",
-    summary: "Searle propõe uma sala que manipula símbolos corretamente sem compreender chinês.",
+    summary: "Searle propõe um experimento mental: um quarto pode manipular símbolos corretamente sem que a pessoa dentro dele conheça seu significado.",
     beats: [
-      "A interface reduz movimento e informação.",
-      "Regras podem produzir respostas convincentes.",
-      "A pergunta volta: comportamento, processamento e compreensão são a mesma coisa?"
+      "Por fora, a resposta pode parecer correta.",
+      "Por dentro, regras manipulam padrões e símbolos.",
+      "O experimento recoloca a pergunta, mas não oferece uma resposta definitiva."
     ],
     speakerNotes: [
       "Apresente como experimento mental, não como prova universal.",
+      "Mencione brevemente a objeção de que a compreensão poderia pertencer ao sistema completo.",
       "Depois use o botão para retornar fisicamente à pergunta inicial."
     ],
-    transitionQuestion: "Voltar à pergunta",
+    transitionQuestion: "Onde estaria a compreensão?",
     visualTone: "quiet"
-  },
-  {
-    id: "final",
-    act: "reflection",
-    shortLabel: "Podem pensar?",
-    title: "A pergunta, \nagora nítida",
-    question: "As máquinas podem pensar?",
-    summary: "A resposta continua aberta, mas a pergunta agora está mais precisa.",
-    beats: [
-      "A composição volta ao início.",
-      "A névoa desaparece.",
-      "A plateia reencontra a pergunta com mais contexto."
-    ],
-    speakerNotes: [
-      "Convide uma reflexão final sem transformar a questão em enquete.",
-      "Feche com a tese: tornar a pergunta mais clara."
-    ],
-    visualTone: "clear"
   }
 ];
 

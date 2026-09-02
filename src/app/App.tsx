@@ -157,20 +157,6 @@ export const App = () => {
         return <InterruptionMoment />;
       case "chinese-room":
         return <ChineseRoomSimulation onReturn={returnToQuestion} />;
-      case "final":
-        return (
-          <div className="reflection-panel panel">
-            <p className="chapter__kicker">Fechamento</p>
-            <h3>A pergunta não desapareceu.</h3>
-            <p>
-              Agora ela carrega comportamento, aprendizado, representação, atenção, geração e
-              compreensão. A resposta continua aberta, mas a pergunta tem contornos mais nítidos.
-            </p>
-            <button className="primary-button" type="button" onClick={returnToQuestion}>
-              Voltar ao início nítido
-            </button>
-          </div>
-        );
       default:
         return null;
     }
@@ -184,7 +170,7 @@ export const App = () => {
       <AmbientParticles enabled={ambientEnabled && !reducedMotion} tone={ambientTone} />
       {reverseFlash ? (
         <div className="reverse-flash" aria-hidden="true">
-          {["Sala Chinesa", "IA generativa", "LLM", "Transformer", "Attention", "embeddings", "Deep Learning", "erro", "perceptron", "Turing"].map(
+          {["Quarto Chinês", "IA generativa", "LLM", "Transformer", "Attention", "embeddings", "Deep Learning", "erro", "perceptron", "Turing"].map(
             (item) => (
               <span key={item}>{item}</span>
             )

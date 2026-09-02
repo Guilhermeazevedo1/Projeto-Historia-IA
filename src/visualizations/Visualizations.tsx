@@ -501,7 +501,7 @@ export const PerceptronPlayground = ({
       </div>
       <svg
         viewBox="0 0 520 330"
-        role="img"
+        role="group"
         aria-label="Plano com gatos e cachorros separados por uma fronteira de decisão"
         onPointerMove={(event) => {
           if (!dragHandle || training) {
@@ -751,131 +751,175 @@ export const XorLimitationPlayground = () => {
   );
 };
 
+const errorRulerSteps = [
+  { id: "discovery", label: "1801", title: "Ceres desaparece de vista." },
+  { id: "hypotheses", label: "HIPÓTESES", title: "Poucas observações permitem muitas órbitas." },
+  { id: "residuals", label: "MEDIR", title: "Cada hipótese deixa desvios diferentes." },
+  { id: "recovery", label: "PREVER", title: "A melhor órbita indica onde procurar." },
+  { id: "loss", label: "HOJE", title: "A mesma pergunta reaparece na IA." }
+] as const;
+
 export const ErrorRuler = () => {
   const [prediction, setPrediction] = useState(0.4);
-  const [phase, setPhase] = useState<0 | 1 | 2>(0);
+  const [phase, setPhase] = useState(0);
   const target = 1;
   const error = target - prediction;
   const loss = error * error;
   const scaleMax = 1.4;
   const targetX = 80 + (target / scaleMax) * 430;
   const predictionX = 80 + (prediction / scaleMax) * 430;
-  const observedX = 390;
-  const predictedX = 262;
   const lossLabel = loss === 0 ? "0" : loss.toFixed(2);
   const isPerfectPrediction = loss === 0;
   const distanceLabelX = (predictionX + targetX) / 2;
-
-  useEffect(() => {
-    const timers = [
-      window.setTimeout(() => setPhase(1), 4200),
-      window.setTimeout(() => setPhase(2), 7600)
-    ];
-
-    return () => {
-      timers.forEach((timer) => window.clearTimeout(timer));
-    };
-  }, []);
+  const currentStep = errorRulerSteps[phase];
+  const isLastStep = phase === errorRulerSteps.length - 1;
 
   return (
     <div className="error-ruler panel">
-      <div className="error-ruler__stage" data-phase={phase}>
-        <div
-          className="error-state error-state--ceres"
-          data-active={phase === 0}
-          aria-hidden={phase !== 0}
-          aria-label="Cena conceitual sobre Ceres e observações imperfeitas"
-        >
+      <header className="error-ruler__header" aria-live="polite">
+        <p>PASSO {phase + 1}/{errorRulerSteps.length} <strong>{currentStep.label}</strong></p>
+        <h3>{currentStep.title}</h3>
+      </header>
+
+      <div className="error-ruler__stage" data-phase={currentStep.id}>
+        <div className="error-state error-state--discovery" data-active={phase === 0} aria-hidden={phase !== 0}>
           <div className="ceres-scene__header">
-            <span>1801</span>
-            <b>Ceres desaparece do céu.</b>
+            <span>1 DE JANEIRO DE 1801</span>
+            <b>Giuseppe Piazzi observa um novo objeto celeste.</b>
           </div>
-          <svg viewBox="0 0 560 230" role="img" aria-label="Órbita simplificada com poucos pontos de observação">
+          <svg viewBox="0 0 560 245" role="img" aria-label="Pequeno arco observado antes de Ceres ficar próximo demais do Sol no céu">
             <ellipse className="ceres-orbit" cx="280" cy="122" rx="190" ry="68" />
+            <path className="ceres-observed-arc" d="M132 80 C176 57 232 52 278 57" />
             <path className="ceres-hidden-arc" d="M352 62 C438 76 478 113 452 151" />
             <circle className="ceres-sun" cx="280" cy="122" r="9" />
-            {[182, 222, 262, 304].map((x, index) => (
-              <circle
-                key={x}
-                className="ceres-observation"
-                cx={x}
-                cy={index % 2 === 0 ? 72 + index * 10 : 78 + index * 8}
-                r="5"
-              />
+            {[154, 190, 226, 262].map((x, index) => (
+              <circle key={x} className="ceres-observation" cx={x} cy={[72, 63, 58, 56][index]} r="5" />
             ))}
-            <path className="ceres-prediction" d="M318 72 C370 69 418 92 444 128" />
-            <circle className="ceres-expected" cx="444" cy="128" r="6" />
+            <circle className="ceres-last-seen" cx="262" cy="56" r="8" />
+            <text className="ceres-svg-label" x="118" y="38">poucas semanas observadas</text>
+            <text className="ceres-svg-label" x="390" y="58">região sem observação</text>
           </svg>
-          <p>Qual previsão está mais próxima das observações?</p>
-          <strong>Não basta saber que erramos. Precisamos medir quanto erramos.</strong>
-        </div>
-
-        <div
-          className="error-state error-state--distance"
-          data-active={phase === 1}
-          aria-hidden={phase !== 1}
-          aria-label="Erro representado como distância entre valor observado e previsto"
-        >
-          <svg viewBox="0 0 560 150" role="img" aria-label="Distância entre valor previsto e observado">
-            <line className="distance-axis" x1="80" y1="84" x2="500" y2="84" />
-            <line className="distance-gap" x1={predictedX} y1="84" x2={observedX} y2="84" />
-            <circle className="distance-dot distance-dot--predicted" cx={predictedX} cy="84" r="8" />
-            <circle className="distance-dot distance-dot--observed" cx={observedX} cy="84" r="8" />
-            <text x={predictedX} y="122" textAnchor="middle">valor previsto</text>
-            <text x={observedX} y="56" textAnchor="middle">valor observado</text>
-          </svg>
-          <div className="error-formulas">
-            <span>erro = observado - previsto</span>
-            <span>erro² = (observado - previsto)²</span>
+          <div className="error-story-line">
+            <span>observações limitadas</span><i aria-hidden="true" />
+            <span>Ceres se aproxima do Sol no céu</span><i aria-hidden="true" />
+            <strong>onde procurar depois?</strong>
           </div>
         </div>
 
-        <div
-          className="error-state error-state--loss"
-          data-active={phase === 2}
-          aria-hidden={phase !== 2}
-          aria-label="Comparação entre alvo e previsão de uma rede neural"
-        >
-          <div className="loss-scene__morph">
-            <span>DA PREVISÃO À PERDA</span>
-          </div>
-          <svg viewBox="0 0 560 170" role="img" aria-label="Distância entre alvo 1.0 e previsão ajustável da rede">
-            <line className="distance-axis" x1="80" y1="82" x2="510" y2="82" />
-            <line
-              className="distance-gap distance-gap--live"
-              x1={predictionX}
-              y1="82"
-              x2={targetX}
-              y2="82"
-              data-zero={isPerfectPrediction}
-            />
-            <text className="distance-label" x={distanceLabelX} y="68" textAnchor="middle" data-zero={isPerfectPrediction}>
-              distância
-            </text>
-            <circle className="distance-dot distance-dot--predicted" cx={predictionX} cy="82" r="9" />
-            <circle className="distance-dot distance-dot--observed" cx={targetX} cy="82" r="9" />
-            <text x={predictionX} y="122" textAnchor="middle">previsão {prediction.toFixed(1)}</text>
-            <text x={targetX} y="52" textAnchor="middle">alvo {target.toFixed(1)}</text>
+        <div className="error-state error-state--hypotheses" data-active={phase === 1} aria-hidden={phase !== 1}>
+          <p className="error-state__lead">As mesmas observações iniciais podem ser explicadas por trajetórias que divergem depois.</p>
+          <svg viewBox="0 0 560 250" role="img" aria-label="Três órbitas candidatas preveem posições futuras diferentes">
+            <line className="ceres-search-boundary" x1="346" y1="30" x2="346" y2="220" />
+            <text className="ceres-svg-label" x="118" y="30">TRECHO OBSERVADO</text>
+            <text className="ceres-svg-label" x="376" y="30">POSIÇÕES PREVISTAS</text>
+            <path className="candidate-orbit candidate-orbit--a" d="M82 190 C152 76 266 54 468 74" />
+            <path className="candidate-orbit candidate-orbit--b" d="M82 190 C154 78 270 58 468 124" />
+            <path className="candidate-orbit candidate-orbit--c" d="M82 190 C158 81 276 64 468 184" />
+            {[150, 198, 246, 294].map((x, index) => (
+              <circle key={x} className="ceres-observation" cx={x} cy={[102, 76, 65, 68][index]} r="5" />
+            ))}
+            {[[468, 74, "a", "A"], [468, 124, "b", "B"], [468, 184, "c", "C"]].map(([x, y, id, label]) => (
+              <g key={id}>
+                <circle className={`candidate-end candidate-end--${id}`} cx={x} cy={y} r="6" />
+                <text className={`candidate-label candidate-label--${id}`} x={Number(x) + 20} y={Number(y) + 4}>{label}</text>
+              </g>
+            ))}
           </svg>
-          <div className="loss-readout" data-zero={isPerfectPrediction}>
-            <strong>FUNÇÃO DE PERDA</strong>
-            <span>(1.0 - {prediction.toFixed(1)})²</span>
-            <b>{lossLabel}</b>
+          <p className="error-state__question">Qual órbita explica melhor os pontos que realmente observamos?</p>
+        </div>
+
+        <div className="error-state error-state--residuals" data-active={phase === 2} aria-hidden={phase !== 2}>
+          <div className="residuals-scene__intro">
+            <span>OBSERVADO</span><i aria-hidden="true" /><span>PREVISTO</span><i aria-hidden="true" /><strong>DESVIO</strong>
           </div>
-          {loss === 0 ? <p className="loss-match">previsão coincidiu com o alvo</p> : null}
-          <label className="loss-slider">
-            Ajuste a previsão da rede
-            <input
-              min="0"
-              max="1.4"
-              step="0.1"
-              type="range"
-              value={prediction}
-              onChange={(event) => setPrediction(Number(event.target.value))}
-            />
-          </label>
+          <svg viewBox="0 0 560 235" role="img" aria-label="Resíduos ligam pontos observados a posições previstas por uma curva">
+            <path className="fitted-orbit" d="M74 188 C164 69 292 48 484 134" />
+            {[
+              { x: 154, observed: 109, predicted: 96 },
+              { x: 220, observed: 75, predicted: 70 },
+              { x: 286, observed: 63, predicted: 67 },
+              { x: 352, observed: 82, predicted: 91 }
+            ].map((point, index) => (
+              <g key={point.x} className="residual-mark" style={{ "--residual-index": index } as CSSProperties}>
+                <line x1={point.x} y1={point.observed} x2={point.x} y2={point.predicted} />
+                <circle className="residual-observed" cx={point.x} cy={point.observed} r="5" />
+                <circle className="residual-predicted" cx={point.x} cy={point.predicted} r="3" />
+              </g>
+            ))}
+            <text className="ceres-svg-label" x="382" y="116">órbita prevista</text>
+            <text className="ceres-svg-label" x="122" y="134">distâncias</text>
+          </svg>
+          <div className="residuals-equation">
+            <span>erro de cada ponto = observado - previsto</span>
+            <strong>erro total = Σ (observado - previsto)²</strong>
+          </div>
+          <p className="error-history-note">No início do século XIX, métodos de ajuste associados a Legendre e Gauss consolidaram essa ideia.</p>
+        </div>
+
+        <div className="error-state error-state--recovery" data-active={phase === 3} aria-hidden={phase !== 3}>
+          <div className="ceres-scene__header">
+            <span>FIM DE 1801</span>
+            <b>A previsão reduz o céu em que era preciso procurar.</b>
+          </div>
+          <svg viewBox="0 0 560 250" role="img" aria-label="Posição prevista e posição observada de Ceres praticamente coincidentes">
+            <ellipse className="ceres-orbit" cx="280" cy="125" rx="190" ry="70" />
+            <path className="ceres-prediction" d="M126 84 C218 42 364 58 452 126" />
+            <line className="recovery-crosshair" x1="452" y1="86" x2="452" y2="166" />
+            <line className="recovery-crosshair" x1="412" y1="126" x2="492" y2="126" />
+            <circle className="ceres-expected" cx="448" cy="122" r="8" />
+            <circle className="ceres-recovered" cx="455" cy="128" r="5" />
+            <text className="recovery-label recovery-label--predicted" x="356" y="100">posição prevista</text>
+            <text className="recovery-label recovery-label--observed" x="466" y="154">Ceres observado</text>
+          </svg>
+          <div className="error-story-line error-story-line--recovery">
+            <span>observar</span><i aria-hidden="true" /><span>ajustar a órbita</span><i aria-hidden="true" />
+            <span>prever</span><i aria-hidden="true" /><strong>reencontrar</strong>
+          </div>
+          <p className="error-state__question">A previsão de Gauss ajudou astrônomos a reencontrar Ceres.</p>
+        </div>
+
+        <div className="error-state error-state--loss" data-active={phase === 4} aria-hidden={phase !== 4}>
+          <div className="loss-history-bridge">
+            <span><b>1801</b> posição prevista ↔ observação</span><i aria-hidden="true" /><span><b>IA</b> previsão da rede ↔ alvo</span>
+          </div>
+          <div className="loss-learning-cycle">
+            <span>modelo prevê</span><i>→</i><span>compara com o alvo</span><i>→</i><strong>mede a perda</strong>
+          </div>
+          <svg viewBox="0 0 560 155" role="img" aria-label="Distância entre alvo 1.0 e previsão ajustável da rede">
+            <line className="distance-axis" x1="80" y1="76" x2="510" y2="76" />
+            <line className="distance-gap distance-gap--live" x1={predictionX} y1="76" x2={targetX} y2="76" data-zero={isPerfectPrediction} />
+            <text className="distance-label" x={distanceLabelX} y="61" textAnchor="middle" data-zero={isPerfectPrediction}>distância</text>
+            <circle className="distance-dot distance-dot--predicted" cx={predictionX} cy="76" r="9" />
+            <circle className="distance-dot distance-dot--observed" cx={targetX} cy="76" r="9" />
+            <text x={predictionX} y="116" textAnchor="middle">previsão {prediction.toFixed(1)}</text>
+            <text x={targetX} y="46" textAnchor="middle">alvo {target.toFixed(1)}</text>
+          </svg>
+          <div className="loss-interaction-row">
+            <div className="loss-readout" data-zero={isPerfectPrediction}>
+              <strong>FUNÇÃO DE PERDA</strong><span>(1.0 - {prediction.toFixed(1)})²</span><b>{lossLabel}</b>
+            </div>
+            <label className="loss-slider">
+              Ajuste a previsão da rede
+              <input min="0" max="1.4" step="0.1" type="range" value={prediction} onChange={(event) => setPrediction(Number(event.target.value))} />
+              <small>{isPerfectPrediction ? "previsão = alvo · perda = 0" : "aproxime a previsão do alvo"}</small>
+            </label>
+          </div>
         </div>
       </div>
+
+      <div className="error-ruler__controls">
+        <button className="ghost-button" type="button" onClick={() => setPhase((value) => Math.max(0, value - 1))} disabled={phase === 0}>
+          <ArrowLeft size={16} aria-hidden="true" />Anterior
+        </button>
+        <div className="error-ruler__progress" aria-hidden="true">
+          {errorRulerSteps.map((item, index) => <i key={item.id} data-active={index <= phase} />)}
+        </div>
+        <button className={isLastStep ? "ghost-button" : "primary-button"} type="button" onClick={() => (isLastStep ? setPhase(0) : setPhase((value) => value + 1))}>
+          {isLastStep ? "Rever história" : "Próximo passo"}
+          {isLastStep ? <RotateCcw size={16} aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}
+        </button>
+      </div>
+      <p className="microcopy">Representação didática: a órbita e os valores numéricos foram simplificados para a explicação.</p>
     </div>
   );
 };
@@ -1681,30 +1725,15 @@ export const DeepLearningScale = () => {
           </g>
 
           <g className="deep-patterns deep-concept" data-visible={step >= 1}>
-              <text x={deepColumns.patterns} y="314" textAnchor="middle">Exemplo conceitual.</text>
-              <line x1="198" y1="72" x2="215" y2="72" />
-              <line x1="230" y1="64" x2="230" y2="82" />
-              <line x1="198" y1="288" x2="215" y2="304" />
-              <path d="M230 302 C238 290 249 290 257 302" />
+            <text x={deepColumns.patterns} y="314" textAnchor="middle">padrões simples</text>
           </g>
 
           <g className="deep-combinations deep-concept" data-visible={step >= 2}>
-              <text x={deepColumns.combinations} y="308" textAnchor="middle">
-                <tspan x={deepColumns.combinations} dy="0">traços + curvas</tspan>
-                <tspan x={deepColumns.combinations} dy="15">→ formas</tspan>
-              </text>
-              <path d="M340 108 L365 94 L390 108" />
-              <rect x="342" y="172" width="46" height="32" rx="10" />
-              <path d="M342 244 C354 230 376 230 388 244" />
+            <text x={deepColumns.combinations} y="314" textAnchor="middle">combinações</text>
           </g>
 
           <g className="deep-abstraction deep-concept" data-visible={step >= 3}>
-              <text x={deepColumns.representation} y="314" textAnchor="middle">hierarquia aprendida</text>
-              <circle cx="512" cy="170" r="22" />
-              <path d="M494 159 C504 147 520 147 530 159" />
-              <path d="M493 178 C505 190 520 190 532 178" />
-              <line x1="512" y1="192" x2="512" y2="224" />
-              <path d="M492 212 C504 204 520 204 532 212" />
+            <text x={deepColumns.representation} y="314" textAnchor="middle">representação</text>
           </g>
 
           <g className="deep-output deep-concept" data-visible={step >= 4}>
@@ -3288,21 +3317,186 @@ export const InterruptionMoment = () => (
   </div>
 );
 
-export const ChineseRoomSimulation = ({ onReturn }: { onReturn: () => void }) => (
-  <div className="chinese-room panel">
-    <div className="symbol-room" aria-hidden="true">
-      <span>符</span>
-      <span>?</span>
-      <span>規</span>
-      <span>→</span>
-      <span>答</span>
+const chineseRoomSteps = [
+  {
+    id: "question",
+    label: "PERGUNTA",
+    title: "Símbolos entram no quarto.",
+    description: "Do lado de fora, alguém envia uma pergunta que parece ter significado."
+  },
+  {
+    id: "rules",
+    label: "REGRAS",
+    title: "Por dentro, há um procedimento.",
+    description: "A pessoa não sabe chinês. Ela apenas consulta um manual e combina padrões."
+  },
+  {
+    id: "answer",
+    label: "RESPOSTA",
+    title: "A resposta sai correta.",
+    description: "Para quem está fora, o comportamento do quarto parece demonstrar compreensão."
+  },
+  {
+    id: "contrast",
+    label: "CONTRASTE",
+    title: "A mesma cena permite duas leituras.",
+    description: "O resultado é convincente, mas o processo interno continua sendo formal."
+  },
+  {
+    id: "system",
+    label: "OBJEÇÃO",
+    title: "Talvez estejamos procurando no lugar errado.",
+    description: "A pessoa pode não compreender. Mas e o quarto, ou o sistema completo?"
+  },
+  {
+    id: "reflection",
+    label: "COMPREENDER?",
+    title: "O experimento não encerra a discussão.",
+    description: "Ele separa uma resposta correta da pergunta sobre o que chamamos de compreensão."
+  }
+] as const;
+
+export const ChineseRoomSimulation = ({ onReturn }: { onReturn: () => void }) => {
+  const [step, setStep] = useState(0);
+  const currentStep = chineseRoomSteps[step];
+  const isLastStep = step === chineseRoomSteps.length - 1;
+
+  return (
+    <div className="chinese-room panel" data-step={currentStep.id}>
+      <AnimatePresence mode="wait">
+        <motion.header
+          className="chinese-room__header"
+          key={currentStep.id}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.24 }}
+          aria-live="polite"
+        >
+          <p className="chinese-room__step">
+            PASSO {step + 1}/{chineseRoomSteps.length} <strong>{currentStep.label}</strong>
+          </p>
+          <h3>{currentStep.title}</h3>
+          <p>{currentStep.description}</p>
+        </motion.header>
+      </AnimatePresence>
+
+      <div
+        className="chinese-room__stage"
+        role="img"
+        aria-label="Experimento mental em que símbolos entram em um quarto, são manipulados por regras e saem como uma resposta correta"
+      >
+        <div className="chinese-room__process">
+          <div className="chinese-room__outside chinese-room__outside--question" data-active={step >= 0}>
+            <span className="chinese-room__place">LADO DE FORA</span>
+            <span className="chinese-room__packet-label">pergunta</span>
+            <div className="chinese-room__symbols" aria-hidden="true">
+              <span>符</span>
+              <span>?</span>
+              <span>規</span>
+            </div>
+          </div>
+
+          <div className="chinese-room__transfer chinese-room__transfer--in" data-active={step >= 1} aria-hidden="true">
+            <span>entra</span>
+            <ArrowRight size={18} />
+          </div>
+
+          <div className="chinese-room__interior" data-active={step >= 1}>
+            <span className="chinese-room__place">DENTRO DO QUARTO</span>
+            <div className="chinese-room__workbench">
+              <div className="chinese-room__person">
+                <i aria-hidden="true" />
+                <strong>PESSOA</strong>
+                <span>não sabe chinês</span>
+              </div>
+              <div className="chinese-room__manual">
+                <strong>MANUAL DE REGRAS</strong>
+                <span data-active={step >= 1}>1. localizar padrão</span>
+                <span data-active={step >= 1}>2. consultar regra</span>
+                <span data-active={step >= 2}>3. devolver símbolos</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="chinese-room__transfer chinese-room__transfer--out" data-active={step >= 2} aria-hidden="true">
+            <span>sai</span>
+            <ArrowRight size={18} />
+          </div>
+
+          <div className="chinese-room__outside chinese-room__outside--answer" data-active={step >= 2}>
+            <span className="chinese-room__place">LADO DE FORA</span>
+            <span className="chinese-room__packet-label">resposta</span>
+            <div className="chinese-room__answer-symbol" aria-hidden="true">答</div>
+            <span className="chinese-room__accepted">resposta aceita</span>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="chinese-room__insight"
+            key={`insight-${currentStep.id}`}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.22 }}
+          >
+            {step < 3 && (
+              <p>{step === 0 ? "Ainda vemos apenas uma entrada." : step === 1 ? "Correspondência não exige conhecer o significado." : "A saída é convincente."}</p>
+            )}
+
+            {step === 3 && (
+              <div className="chinese-room__contrast">
+                <p><strong>POR FORA</strong><span>resposta coerente · parece compreensão</span></p>
+                <p><strong>POR DENTRO</strong><span>regras · padrões · símbolos</span></p>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="chinese-room__system-reply">
+                <div aria-label="Possíveis lugares da compreensão">
+                  <span>PESSOA</span><i aria-hidden="true" />
+                  <span>MANUAL</span><i aria-hidden="true" />
+                  <span>QUARTO</span><i aria-hidden="true" />
+                  <strong>SISTEMA COMPLETO</strong>
+                </div>
+                <p>Uma objeção: talvez a pessoa não compreenda, mas o sistema completo possa compreender.</p>
+              </div>
+            )}
+
+            {step === 5 && (
+              <p className="chinese-room__final-question">Processar símbolos é o mesmo que compreender?</p>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="chinese-room__controls">
+        <button
+          className="ghost-button"
+          type="button"
+          onClick={() => setStep((value) => Math.max(0, value - 1))}
+          disabled={step === 0}
+        >
+          <ArrowLeft size={16} aria-hidden="true" />
+          Anterior
+        </button>
+
+        <div className="chinese-room__progress" aria-hidden="true">
+          {chineseRoomSteps.map((item, index) => <i key={item.id} data-active={index <= step} />)}
+        </div>
+
+        <button
+          className="primary-button"
+          type="button"
+          onClick={() => (isLastStep ? onReturn() : setStep((value) => value + 1))}
+        >
+          {isLastStep ? "Voltar à pergunta" : "Próximo passo"}
+          {isLastStep ? <RotateCcw size={16} aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}
+        </button>
+      </div>
+
+      <p className="microcopy">Experimento mental de John Searle. A visualização é uma simplificação didática.</p>
     </div>
-    <p>
-      Uma pessoa segue regras para manipular símbolos que não compreende. Do lado de fora, a resposta pode
-      parecer correta. Por dentro, resta a pergunta: processamento formal é compreensão?
-    </p>
-    <button className="primary-button" type="button" onClick={onReturn}>
-      Voltar à pergunta
-    </button>
-  </div>
-);
+  );
+};

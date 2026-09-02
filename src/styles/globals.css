@@ -194,8 +194,7 @@ a {
 
 #perceptron h2,
 #thaw h2,
-#language h2,
-#final h2 {
+#language h2 {
   max-width: 100%;
   white-space: pre;
   font-size: clamp(2rem, 3.45vw, 4rem);
