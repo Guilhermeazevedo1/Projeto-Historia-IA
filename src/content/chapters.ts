@@ -158,7 +158,23 @@ export const chapters: Chapter[] = [
       "Diferencie o cálculo orbital de Gauss da história mais ampla dos mínimos quadrados, associada também a Legendre.",
       "No último passo, mostre que a IA reutiliza a estrutura previsão, comparação, perda e ajuste."
     ],
-    transitionQuestion: "Sabemos o tamanho do erro. Mas qual peso deve mudar?",
+    transitionQuestion: "Agora que a perda virou um número, como encontramos a configuração que a torna menor?",
+    visualTone: "flow"
+  },
+  {
+    id: "gradient",
+    act: "journey",
+    shortLabel: "Otimização",
+    title: "Gradient\ndescent",
+    question: "Como encontrar o menor erro possível?",
+    summary: "Cada configuração de pesos ocupa um ponto na paisagem de perda. Treinar é procurar uma região mais baixa.",
+    beats: [],
+    speakerNotes: [
+      "Comece com a curva de um peso e depois revele que dois pesos formam uma superfície.",
+      "Use a paisagem 3D como representação didática de um espaço que, em redes reais, possui muito mais dimensões.",
+      "Compare passos pequenos, adequados e grandes durante a descida."
+    ],
+    transitionQuestion: "A paisagem mostra o caminho. Mas, em uma rede com muitos pesos, como descobrimos a inclinação de cada um?",
     visualTone: "flow"
   },
   {
@@ -166,30 +182,15 @@ export const chapters: Chapter[] = [
     act: "journey",
     shortLabel: "Backpropagation",
     title: "Back\npropagation",
-    question: "Como uma rede aprende com seus erros?",
-    summary: "A rede respondeu. Sabemos quanto ela errou. Agora precisamos descobrir por quê.",
+    question: "Como descobrir a contribuição de cada peso?",
+    summary: "Backpropagation leva o cálculo do erro de volta pela rede e encontra os gradientes que orientam a descida.",
     beats: [],
     speakerNotes: [
-      "Explique que backpropagation calcula gradientes, sem dizer que ele atualiza os pesos sozinho.",
+      "Explique que backpropagation calcula gradientes; o gradient descent usa essa informação para atualizar os pesos.",
       "Use a regra da cadeia como dependências encadeadas, não como uma aula de cálculo."
     ],
-    transitionQuestion: "Como usamos essa informação para diminuir a perda?",
-    visualTone: "flow"
-  },
-  {
-    id: "gradient",
-    act: "journey",
-    shortLabel: "Direção",
-    title: "Gradient\ndescent",
-    question: "Sabemos a direção. Quanto devemos andar?",
-    summary: "Aprender é procurar uma configuração de pesos que produza menos perda.",
-    beats: [],
-    speakerNotes: [
-      "Use a paisagem como intuição, não como aula formal de cálculo.",
-      "Compare perda decrescente e oscilante."
-    ],
     transitionQuestion:
-      "Agora as redes podiam ajustar milhares — e depois milhões — de parâmetros. Mas havia outro problema: como transformar palavras em algo que uma rede pudesse processar?",
+      "Se podemos medir o erro, encontrar uma direção e atribuir responsabilidade aos pesos, o que acontece quando empilhamos muitas camadas?",
     visualTone: "flow"
   },
   {

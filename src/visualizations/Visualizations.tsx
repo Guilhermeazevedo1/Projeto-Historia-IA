@@ -14,8 +14,16 @@ import {
   getEmbeddingNeighbors,
   getEmbeddingWord
 } from "./embeddingData";
+import {
+  initialLossPoint,
+  learningRateOptions,
+  takeGradientStep,
+  type LearningRateMode,
+  type LossPoint
+} from "./lossLandscapeModel";
 
 const EmbeddingExplorer3D = lazy(() => import("./EmbeddingExplorer3D"));
+const LossLandscape3D = lazy(() => import("./LossLandscape3D"));
 
 export const OpeningStage = ({ onStart }: { onStart: () => void }) => (
   <div className="opening-stage">
@@ -1261,7 +1269,7 @@ export const NeuralNetworkFlow = () => {
           ) : null}
           {showsGradients ? (
             <>
-              <p className="network__detail">A rede avança para responder. O cálculo retorna para ensiná-la.</p>
+              <p className="network__detail">Essas inclinações são a direção que o gradient descent usa para ajustar os pesos.</p>
               <p className="network__chain"><b>REGRA DA CADEIA</b> Partimos da perda e seguimos as dependências de volta até os pesos.</p>
               <p className="network__mini-gradients">O mesmo cálculo é feito para os outros pesos: ∂L/∂w₁ · ∂L/∂w₂ · ∂L/∂w₃ · ...</p>
             </>
@@ -1280,37 +1288,29 @@ export const NeuralNetworkFlow = () => {
   );
 };
 
-export const LossLandscape = () => {
-  const initialWeight = 0.8;
-  const minimumWeight = 0.2;
-  const learningRates = {
-    pequena: { label: "taxa pequena", eta: 0.08, steps: 10 },
-    adequada: { label: "taxa adequada", eta: 0.32, steps: 7 },
-    grande: { label: "taxa grande", eta: 1.08, steps: 8 }
-  };
-  const [weights, setWeights] = useState([initialWeight]);
-  const [gradientVisible, setGradientVisible] = useState(false);
-  const [rateMode, setRateMode] = useState<keyof typeof learningRates | null>(null);
+export const LossLandscape = ({ reducedMotion = false }: { reducedMotion?: boolean }) => {
+  const [stage, setStage] = useState(0);
+  const [points, setPoints] = useState<LossPoint[]>([initialLossPoint]);
+  const [rateMode, setRateMode] = useState<LearningRateMode>("adequada");
   const [running, setRunning] = useState(false);
   const animationRef = useRef<number | null>(null);
   const plot = { x: 70, y: 38, width: 500, height: 250 };
   const domain = { min: -0.35, max: 1.05 };
+  const minimumWeight = 0.2;
+  const currentWeight = 0.8;
   const maxLoss = 0.72;
-  const currentWeight = weights[weights.length - 1];
-  const currentLoss = (currentWeight - minimumWeight) ** 2;
-  const gradient = 2 * (currentWeight - minimumWeight);
-  const stepCount = Math.max(0, weights.length - 1);
-  const hasStepped = stepCount > 0;
-  const showRateControls = stepCount >= 3 || rateMode !== null;
-  const completed = rateMode !== null && !running && stepCount > 0;
+  const currentLoss2D = (currentWeight - minimumWeight) ** 2;
+  const gradient2D = 2 * (currentWeight - minimumWeight);
+  const currentPoint3D = points[points.length - 1];
+  const completed = stage === 3 && !running && points.length > 1;
+  const stageLabels = ["UM PESO", "DIREÇÃO", "PAISAGEM 3D", "DESCIDA"];
   const xForWeight = (weight: number) => plot.x + ((weight - domain.min) / (domain.max - domain.min)) * plot.width;
   const yForLoss = (loss: number) => plot.y + plot.height - (Math.min(maxLoss, loss) / maxLoss) * plot.height;
   const pointForWeight = (weight: number) => ({
     x: xForWeight(weight),
     y: yForLoss((weight - minimumWeight) ** 2)
   });
-  const currentPoint = pointForWeight(currentWeight);
-  const previousPoint = weights.length > 1 ? pointForWeight(weights[weights.length - 2]) : null;
+  const currentPoint2D = pointForWeight(currentWeight);
   const curvePath = Array.from({ length: 64 }, (_, index) => {
     const weight = domain.min + (index / 63) * (domain.max - domain.min);
     const point = pointForWeight(weight);
@@ -1319,59 +1319,63 @@ export const LossLandscape = () => {
   const tangentLength = 70;
   const tangentScale = 0.38;
   const tangentStart = {
-    x: currentPoint.x - tangentLength / 2,
-    y: currentPoint.y + (gradient * tangentLength * tangentScale) / 2
+    x: currentPoint2D.x - tangentLength / 2,
+    y: currentPoint2D.y + (gradient2D * tangentLength * tangentScale) / 2
   };
   const tangentEnd = {
-    x: currentPoint.x + tangentLength / 2,
-    y: currentPoint.y - (gradient * tangentLength * tangentScale) / 2
+    x: currentPoint2D.x + tangentLength / 2,
+    y: currentPoint2D.y - (gradient2D * tangentLength * tangentScale) / 2
   };
-  const oppositeX = currentPoint.x - Math.sign(gradient || 1) * 56;
-  const rateConclusion =
-    rateMode === "pequena"
-      ? "Passos pequenos são estáveis, mas lentos."
-      : rateMode === "adequada"
-        ? "Passos adequados reduzem a perda com eficiência."
-        : rateMode === "grande"
-          ? "Passos grandes podem ultrapassar o mínimo e oscilar."
-          : "";
+  const oppositeX = currentPoint2D.x - 56;
 
-  const takeStep = (eta = 0.32) => {
-    setGradientVisible(true);
-    setWeights((current) => {
-      const weight = current[current.length - 1];
-      const nextWeight = weight - eta * 2 * (weight - minimumWeight);
-      return [...current, Math.max(domain.min, Math.min(domain.max, Number(nextWeight.toFixed(4))))];
-    });
-  };
-
-  const runRateDemo = (mode: keyof typeof learningRates) => {
+  const stopAnimation = () => {
     if (animationRef.current !== null) {
       window.clearInterval(animationRef.current);
+      animationRef.current = null;
+    }
+    setRunning(false);
+  };
+
+  const runRateDemo = (mode: LearningRateMode) => {
+    stopAnimation();
+    const option = learningRateOptions[mode];
+    let nextPoints = [initialLossPoint];
+    let current = initialLossPoint;
+    setRateMode(mode);
+    setPoints(nextPoints);
+
+    if (reducedMotion) {
+      for (let index = 0; index < option.steps; index += 1) {
+        current = takeGradientStep(current, option.eta);
+        nextPoints = [...nextPoints, current];
+      }
+      setPoints(nextPoints);
+      return;
     }
 
-    const { eta, steps } = learningRates[mode];
-    let nextWeights = [initialWeight];
-    let current = initialWeight;
-    setRateMode(mode);
-    setGradientVisible(true);
-    setWeights(nextWeights);
     setRunning(true);
-
     animationRef.current = window.setInterval(() => {
-      current = current - eta * 2 * (current - minimumWeight);
-      current = Math.max(domain.min, Math.min(domain.max, Number(current.toFixed(4))));
-      nextWeights = [...nextWeights, current];
-      setWeights(nextWeights);
+      current = takeGradientStep(current, option.eta);
+      nextPoints = [...nextPoints, current];
+      setPoints(nextPoints);
 
-      if (nextWeights.length > steps) {
-        if (animationRef.current !== null) {
-          window.clearInterval(animationRef.current);
-          animationRef.current = null;
-        }
-        setRunning(false);
+      if (nextPoints.length > option.steps) {
+        stopAnimation();
       }
     }, 520);
+  };
+
+  const moveToStage = (nextStage: number) => {
+    stopAnimation();
+    setStage(nextStage);
+    if (nextStage < 3) {
+      setPoints([initialLossPoint]);
+    }
+  };
+
+  const beginDescent = () => {
+    setStage(3);
+    runRateDemo("adequada");
   };
 
   useEffect(() => {
@@ -1397,119 +1401,144 @@ export const LossLandscape = () => {
   );
 
   return (
-    <div className="landscape panel" data-complete={completed}>
+    <div className="landscape panel" data-complete={completed} data-stage={stage}>
       <div className="landscape__header">
-        <span>Vamos acompanhar apenas um peso.</span>
-        <b>passo {stepCount}</b>
+        <span>{stage < 2 ? "Começamos acompanhando apenas um peso." : "Agora acompanhamos dois pesos ao mesmo tempo."}</span>
+        <b>PASSO {stage + 1}/4 — {stageLabels[stage]}</b>
       </div>
 
-      <svg viewBox="0 0 660 340" role="img" aria-label="Curva de perda em U mostrando gradient descent em um peso">
-        <line className="landscape-axis" x1={plot.x} y1={plot.y + plot.height} x2={plot.x + plot.width + 35} y2={plot.y + plot.height} />
-        <line className="landscape-axis" x1={plot.x} y1={plot.y - 6} x2={plot.x} y2={plot.y + plot.height} />
-        <text className="landscape-axis-label" x={plot.x - 40} y={plot.y + 16}>PERDA L</text>
-        <text className="landscape-axis-label" x={plot.x + plot.width - 12} y={plot.y + plot.height + 32}>PESO w</text>
-        <path className="landscape-curve" d={curvePath} />
-        <line className="landscape-minimum" x1={xForWeight(minimumWeight)} y1={plot.y + plot.height - 44} x2={xForWeight(minimumWeight)} y2={plot.y + plot.height + 4} />
-        <text className="landscape-minimum-label" x={xForWeight(minimumWeight)} y={plot.y + plot.height - 54} textAnchor="middle">menor perda</text>
+      <AnimatePresence mode="wait" initial={false}>
+        {stage < 2 ? (
+          <motion.div
+            className="landscape__visual landscape__visual--curve"
+            key="curve"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <svg viewBox="0 0 660 340" role="img" aria-label="Curva de perda em U mostrando a direção do gradiente para um peso">
+              <line className="landscape-axis" x1={plot.x} y1={plot.y + plot.height} x2={plot.x + plot.width + 35} y2={plot.y + plot.height} />
+              <line className="landscape-axis" x1={plot.x} y1={plot.y - 6} x2={plot.x} y2={plot.y + plot.height} />
+              <text className="landscape-axis-label" x={plot.x - 40} y={plot.y + 16}>PERDA L</text>
+              <text className="landscape-axis-label" x={plot.x + plot.width - 12} y={plot.y + plot.height + 32}>PESO w</text>
+              <path className="landscape-curve" d={curvePath} />
+              <line className="landscape-minimum" x1={xForWeight(minimumWeight)} y1={plot.y + plot.height - 44} x2={xForWeight(minimumWeight)} y2={plot.y + plot.height + 4} />
+              <text className="landscape-minimum-label" x={xForWeight(minimumWeight)} y={plot.y + plot.height - 54} textAnchor="middle">menor perda</text>
 
-        {weights.slice(0, -1).map((weight, index) => {
-          const point = pointForWeight(weight);
-          return (
-            <circle
-              key={`${weight}-${index}`}
-              className="landscape-trace"
-              cx={point.x}
-              cy={point.y}
-              r={Math.max(3.2, 7 - index * 0.35)}
-              style={{ opacity: Math.max(0.16, 0.45 - index * 0.035) }}
-            />
-          );
-        })}
+              {stage === 1 ? (
+                <>
+                  <line className="landscape-tangent" x1={tangentStart.x} y1={tangentStart.y} x2={tangentEnd.x} y2={tangentEnd.y} />
+                  <text className="landscape-gradient-label" x={currentPoint2D.x + 34} y={currentPoint2D.y - 44}>gradiente</text>
+                  <line className="landscape-gradient-arrow" x1={currentPoint2D.x + 8} y1={currentPoint2D.y - 10} x2={currentPoint2D.x + 58} y2={currentPoint2D.y - 46} />
+                  <line className="landscape-descent-arrow" x1={currentPoint2D.x - 8} y1={currentPoint2D.y + 12} x2={oppositeX} y2={currentPoint2D.y + 46} />
+                  <text className="landscape-descent-note" x={oppositeX - 28} y={currentPoint2D.y + 58}>descida</text>
+                </>
+              ) : null}
 
-        {previousPoint ? (
-          <line className="landscape-step-arrow" x1={previousPoint.x} y1={previousPoint.y} x2={currentPoint.x} y2={currentPoint.y} />
-        ) : null}
-
-        {gradientVisible ? (
-          <>
-            <line className="landscape-tangent" x1={tangentStart.x} y1={tangentStart.y} x2={tangentEnd.x} y2={tangentEnd.y} />
-            <text className="landscape-gradient-label" x={currentPoint.x + 34} y={currentPoint.y - 44}>gradiente</text>
-            <line className="landscape-gradient-arrow" x1={currentPoint.x + 8} y1={currentPoint.y - 10} x2={currentPoint.x + 58} y2={currentPoint.y - 46} />
-            <line className="landscape-descent-arrow" x1={currentPoint.x - 8} y1={currentPoint.y + 12} x2={oppositeX} y2={currentPoint.y + 46} />
-            <text className="landscape-descent-note" x={oppositeX - 28} y={currentPoint.y + 58}>descida</text>
-          </>
-        ) : null}
-
-        <circle className="landscape-current" cx={currentPoint.x} cy={currentPoint.y} r="12" />
-        <g className="landscape-point-label" transform={`translate(${Math.min(currentPoint.x + 18, 548)} ${Math.max(currentPoint.y - 30, 58)})`}>
-          <rect x="0" y="0" width="82" height="42" rx="6" />
-          <text x="10" y="17">w = {currentWeight.toFixed(2)}</text>
-          <text x="10" y="34">L = {currentLoss.toFixed(2)}</text>
-        </g>
-      </svg>
+              <circle className="landscape-current" cx={currentPoint2D.x} cy={currentPoint2D.y} r="12" />
+              <g className="landscape-point-label" transform={`translate(${Math.min(currentPoint2D.x + 18, 548)} ${Math.max(currentPoint2D.y - 30, 58)})`}>
+                <rect x="0" y="0" width="82" height="42" rx="6" />
+                <text x="10" y="17">w = {currentWeight.toFixed(2)}</text>
+                <text x="10" y="34">L = {currentLoss2D.toFixed(2)}</text>
+              </g>
+            </svg>
+          </motion.div>
+        ) : (
+          <motion.div
+            className="landscape__visual landscape__visual--three"
+            key="surface"
+            initial={{ opacity: 0, scale: 0.985 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.985 }}
+          >
+            <Suspense fallback={<div className="loss-landscape-three__fallback">Preparando a paisagem...</div>}>
+              <LossLandscape3D points={points} reducedMotion={reducedMotion} running={running} />
+            </Suspense>
+            <span className="landscape-three-label landscape-three-label--height">altura = perda</span>
+            <span className="landscape-three-label landscape-three-label--w1">peso w₁</span>
+            <span className="landscape-three-label landscape-three-label--w2">peso w₂</span>
+            <div className="landscape-three-readout" aria-live="polite">
+              <span>w₁ {currentPoint3D.w1.toFixed(2)}</span>
+              <span>w₂ {currentPoint3D.w2.toFixed(2)}</span>
+              <strong>perda {currentPoint3D.loss < 0.005 ? "≈ 0" : currentPoint3D.loss.toFixed(3)}</strong>
+            </div>
+            <p className="landscape-three-hint">arraste para observar a superfície</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="landscape__explain">
-        {completed ? (
-          <div className="landscape-closing">
-            <b>TREINAR É REPETIR</b>
-            <span>calcular gradientes → ajustar pesos → calcular novamente → ...</span>
-            <span>w → w₁  w₂  w₃  ...  wₙ</span>
-            <em>Estamos vendo apenas um peso. Uma rede ajusta muitos deles.</em>
+        {stage === 0 ? (
+          <div className="landscape-didactic">
+            <b>UMA DIMENSÃO</b>
+            <strong>peso → perda</strong>
+            <span>Para cada valor de um peso, existe uma perda. O ponto mais baixo é a melhor configuração nessa curva.</span>
           </div>
-        ) : showRateControls ? (
-          <div className="landscape-didactic landscape-didactic--rate">
-            <b>TAMANHO DO PASSO</b>
-            <span>η controla quanto o peso muda em cada atualização.</span>
-            {rateConclusion ? <strong>{rateConclusion}</strong> : null}
-          </div>
-        ) : hasStepped ? (
-          <div className="landscape-didactic landscape-didactic--formula">
-            <b>AJUSTE DO PESO</b>
-            <strong>w novo = w atual − η × ∂L/∂w</strong>
-            <span><em>∂L/∂w</em> direção</span>
-            <span><em>η</em> tamanho do passo</span>
-          </div>
-        ) : gradientVisible ? (
+        ) : stage === 1 ? (
           <div className="landscape-didactic landscape-didactic--gradient">
             <div>
               <b>GRADIENTE</b>
-              <strong>∂L/∂w</strong>
-              <span>Mostra para onde a perda aumenta.</span>
+              <strong>indica a subida</strong>
+              <span>Mede a inclinação local da perda.</span>
             </div>
             <div>
               <b>GRADIENT DESCENT</b>
-              <strong>movimento ←</strong>
-              <span>Movemos o peso na direção contrária.</span>
+              <strong>anda no sentido contrário</strong>
+              <span>Repetimos pequenos ajustes para descer.</span>
             </div>
           </div>
+        ) : stage === 2 ? (
+          <div className="landscape-didactic">
+            <b>DOIS PESOS</b>
+            <strong>A curva vira uma superfície.</strong>
+            <span>Cada posição combina w₁ e w₂; a altura representa a perda. Redes reais formam paisagens com muito mais dimensões.</span>
+          </div>
         ) : (
-          <p>Para cada valor do peso, existe uma perda.</p>
+          <div className="landscape-didactic landscape-didactic--rate">
+            <b>TAMANHO DO PASSO · η</b>
+            <strong>{learningRateOptions[rateMode].conclusion}</strong>
+            <span>Cada ponto amarelo é uma nova configuração dos pesos. A trajetória procura o vale de menor perda.</span>
+          </div>
         )}
       </div>
 
       <div className="landscape__controls">
-        {!gradientVisible ? (
-          <button className="primary-button" type="button" onClick={() => setGradientVisible(true)}>
-            Mostrar gradiente
+        {stage > 0 ? (
+          <button className="ghost-button" type="button" onClick={() => moveToStage(stage - 1)} disabled={running}>
+            <ArrowLeft size={17} />
+            Anterior
           </button>
-        ) : !showRateControls ? (
-          <button className="primary-button" type="button" onClick={() => takeStep()}>
-            {hasStepped ? "Dar outro passo" : "Dar um passo"}
+        ) : <span />}
+
+        {stage === 0 ? (
+          <button className="primary-button" type="button" onClick={() => moveToStage(1)}>
+            Mostrar direção
+            <ArrowRight size={17} />
+          </button>
+        ) : stage === 1 ? (
+          <button className="primary-button" type="button" onClick={() => moveToStage(2)}>
+            Ver paisagem 3D
+            <ArrowRight size={17} />
+          </button>
+        ) : stage === 2 ? (
+          <button className="primary-button" type="button" onClick={beginDescent}>
+            Iniciar descida
+            <ArrowRight size={17} />
           </button>
         ) : (
-          <>
-            {Object.entries(learningRates).map(([key, option]) => (
+          <div className="landscape-rate-controls" aria-label="Comparar tamanhos de passo">
+            {(Object.entries(learningRateOptions) as [LearningRateMode, (typeof learningRateOptions)[LearningRateMode]][]).map(([key, option]) => (
               <button
                 key={key}
                 className={rateMode === key ? "primary-button" : "ghost-button"}
                 type="button"
-                onClick={() => runRateDemo(key as keyof typeof learningRates)}
+                onClick={() => runRateDemo(key)}
                 disabled={running}
               >
                 {option.label}
               </button>
             ))}
-          </>
+          </div>
         )}
       </div>
     </div>

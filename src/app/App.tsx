@@ -136,7 +136,7 @@ export const App = () => {
       case "backprop":
         return <NeuralNetworkFlow />;
       case "gradient":
-        return <LossLandscape />;
+        return <LossLandscape reducedMotion={reducedMotion} />;
       case "deep-learning":
         return <DeepLearningScale />;
       case "language":
