@@ -3054,6 +3054,13 @@
   padding-top: clamp(0.7rem, 1.4vh, 0.95rem);
 }
 
+.landscape__controls svg {
+  width: 1rem;
+  height: 1rem;
+  min-height: 0;
+  flex: 0 0 auto;
+}
+
 .landscape-rate-controls {
   display: flex;
   flex-wrap: wrap;
