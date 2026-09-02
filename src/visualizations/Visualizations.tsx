@@ -1970,7 +1970,7 @@ export const TokensLab = () => {
             <span>EXEMPLO DIDÁTICO</span>
             <p className="tokens-phrase tokens-phrase--word">telhadinho</p>
             <div className="token-transform__items token-transform__items--split">
-              {["telhado", "inho"].map((token) => (
+              {["telhad", "inho"].map((token) => (
                 <b key={token} data-kind="tokens">[{token}]</b>
               ))}
             </div>
